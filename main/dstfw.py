@@ -64,7 +64,8 @@ def handle_dst_fw():
                 decide_dst_fw(policy, append_list, dst_if)
         else:
             if not flag:
-                data = str('5.5.5.5')
+                #zoneにIPアドレスが設定されていない場合、テストシナリオのdst-fwにzone名を記載する
+                data = str(policy['dst_zone'])
                 multiple.handle_multiple_ip(
                     policy, append_list, data)
 

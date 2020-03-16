@@ -52,7 +52,8 @@ def handle_src_fw():
                 decide_src_fw(policy, append_list, src_if)
         else:
             if not flag:
-                data = str('3.3.3.3')
+                #zoneにIPアドレスが設定されていない場合、テストシナリオのsrc-fwにzone名を記載する
+                data = str(policy['src_zone'])
                 multiple.handle_multiple_ip(
                     policy, append_list, data)
    
