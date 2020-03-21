@@ -17,21 +17,22 @@ def select_dst_ip_from_scope_ip(policy, scope_ip):
     if policy['src_ip'] == '"Any"' and 'Untrust"' not in policy['src_zone']:
         try:
             dst_ip += [str(scope_ip[1]), str(scope_ip[-2]),
-                   str(scope_ip[1]), str(scope_ip[-2])] * service_element_num
+                       str(scope_ip[1]), str(scope_ip[-2])] * service_element_num
         except IndexError:
-            dst_ip += [str(scope_ip[0]), str(scope_ip[0]), 'NaN', 'NaN'] * service_element_num
+            dst_ip += [str(scope_ip[0]), str(scope_ip[0]),
+                       'NaN', 'NaN'] * service_element_num
     elif "VIP(" in policy['src_ip'] and policy['protocol'] == '"ANY"':
         for vip_c in absorbdict.vip_dict:
             if policy['src_ip'].strip(')"').split('(')[1] == vip_c['if_name'] and vip_c['global_ip'] == "interface-ip":
                 try:
                     dst_ip += [str(scope_ip[1]), str(scope_ip[-2])
-                           ] * service_element_num
+                               ] * service_element_num
                 except IndexError:
                     dst_ip += [str(scope_ip[0]), 'NaN'] * service_element_num
             elif policy['src_ip'].strip(')"').split('(')[1] == vip_c['global_ip']:
                 try:
                     dst_ip += [str(scope_ip[1]), str(scope_ip[-2])
-                           ] * service_element_num
+                               ] * service_element_num
                 except IndexError:
                     dst_ip += [str(scope_ip[0]), 'NaN'] * service_element_num
     else:
@@ -40,9 +41,10 @@ def select_dst_ip_from_scope_ip(policy, scope_ip):
         src_address_element_num = multiple.src_address_element_num
         try:
             dst_ip += [str(scope_ip[1]), str(scope_ip[-2])
-                    ] * service_element_num * src_address_element_num
+                       ] * service_element_num * src_address_element_num
         except IndexError:
-            dst_ip += [str(scope_ip[0]), 'NaN'] * service_element_num * src_address_element_num
+            dst_ip += [str(scope_ip[0]), 'NaN'] * \
+                service_element_num * src_address_element_num
 
 
 # 該当するIFで定義している中で最も広いnetworkアドレスを返す
@@ -302,11 +304,19 @@ def judge_dst_ip_is_group_address(policy, service_element_num):
             if policy['dst_ip'] == group_address_c['group_name']:
                 flag = True
                 dst_address_name = group_address_c['address_name']
+                flags = False
                 for address_c in absorbdict.address_dict:
                     if dst_address_name == address_c['address_name']:
                         flags = True
                         dst_ip_list += [str(address_c['ip_address'])]
-                        continue
+                else:
+                    if not flags:
+                        for group_address_c2 in absorbdict.group_address_dict:
+                            if dst_address_name == group_address_c2['group_name']:
+                                dst_address_name2 = group_address_c2['address_name']
+                                for address_c2 in absorbdict.address_dict:
+                                    if dst_address_name2 == address_c2['address_name']:
+                                        dst_ip_list += [str(address_c2['ip_address'])]
         else:
             if dst_ip_list != []:
                 handle_dst_ip_list(policy, dst_ip_list)
@@ -334,10 +344,10 @@ def address_dst_ip(policy, service_element_num):
                 src_ip_element(policy, data, service_element_num)
             break
     else:
-        if not flag:    
+        if not flag:
             data = str("NaN")
             print('policy id = %s は宛先IPが登録されていないため出力されませんでした' %
-                    policy['policy_id'])
+                  policy['policy_id'])
             src_ip_element(policy, data, service_element_num)
 
 

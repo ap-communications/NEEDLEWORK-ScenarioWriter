@@ -17,7 +17,7 @@ def decide_src_fw(policy, append_list, src_if):
             if data != 'None':
                 multiple.handle_multiple_ip(
                     policy, append_list, data)
-    
+
 
 def handle_src_fw():
     global src_fw
@@ -42,7 +42,8 @@ def handle_src_fw():
                         decide_src_fw(policy, append_list, src_if)
                         break
                     elif policy['src_ip'].strip(')"').split('(')[1] == vip_c['if_name'] and vip_c['global_ip'] == "interface-ip":
-                        src_if = policy['src_ip'].strip(')"').split('(')[1].replace('"', '')
+                        src_if = policy['src_ip'].strip(')"').split(
+                            '(')[1].replace('"', '')
                         decide_src_fw(policy, append_list, src_if)
                         break
                 break
@@ -52,12 +53,10 @@ def handle_src_fw():
                 decide_src_fw(policy, append_list, src_if)
         else:
             if not flag:
-                #zoneにIPアドレスが設定されていない場合、テストシナリオのsrc-fwにzone名を記載する
+                # zoneにIPアドレスが設定されていない場合、テストシナリオのsrc-fwにzone名を記載する
                 data = str(policy['src_zone'])
                 multiple.handle_multiple_ip(
                     policy, append_list, data)
-   
-
 
 
 handle_src_fw()

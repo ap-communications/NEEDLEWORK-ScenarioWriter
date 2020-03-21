@@ -54,7 +54,8 @@ def handle_dst_fw():
                         decide_dst_fw(policy, append_list, dst_if)
                         break
                     elif policy['dst_ip'].strip(')"').split('(')[1] == vip_c['if_name'] and vip_c['global_ip'] == "interface-ip":
-                        dst_if = policy['dst_ip'].strip(')"').split('(')[1].replace('"', '')
+                        dst_if = policy['dst_ip'].strip(')"').split(
+                            '(')[1].replace('"', '')
                         decide_dst_fw(policy, append_list, dst_if)
                         break
                 break
@@ -64,7 +65,7 @@ def handle_dst_fw():
                 decide_dst_fw(policy, append_list, dst_if)
         else:
             if not flag:
-                #zoneにIPアドレスが設定されていない場合、テストシナリオのdst-fwにzone名を記載する
+                # zoneにIPアドレスが設定されていない場合、テストシナリオのdst-fwにzone名を記載する
                 data = str(policy['dst_zone'])
                 multiple.handle_multiple_ip(
                     policy, append_list, data)

@@ -2,7 +2,6 @@ import sys
 import linecache
 import copy
 
-# TODO:マルチセルポリシーに対応する
 
 option = sys.argv
 
@@ -81,6 +80,7 @@ def convert_list_to_dict(key, value, dictionary):
         key, value)}
     dictionary.append(d)
 
+
 def policy_multicell(file_name, target_line_no):
     i = 0
     policy_element = []
@@ -88,47 +88,47 @@ def policy_multicell(file_name, target_line_no):
     target_line = []
     base_policy = []
     while True:
-        #本関数 呼び出し元で処理していた行の値を取得
+        # 本関数 呼び出し元で処理していた行の値を取得
         config_file = open(file_name, 'r')
         target_line = config_file.readlines()[target_line_no - 1]
         config_file.close
-        #"set policy id **" 〜 "exit"までの値を取得する
+        # "set policy id **" 〜 "exit"までの値を取得する
         if 'exit' in target_line:
             break
         else:
             policy_element = target_line.strip().split()
-            if 'set' in policy_element and 'policy' in policy_element and 'from' in policy_element :
-                #Policy定義1行目（ベースとなるポリシー）                 
+            if 'set' in policy_element and 'policy' in policy_element and 'from' in policy_element:
+                # Policy定義1行目（ベースとなるポリシー）
                 base_policy = policy_element
                 policy_value_list.append(base_policy)
 
-            elif 'set' in policy_element and 'src-address' in policy_element :
+            elif 'set' in policy_element and 'src-address' in policy_element:
                 policy_src_address = copy.copy(base_policy)
-                #名前付きPolicy:base_policyリストの11個目の要素（src-address）にマルチセルポリシーの要素を追加する                
-                #名前無しPolicy：base_policyリストの9個目の要素（src-address）にマルチセルポリシーの要素を追加する
-                if base_policy[4] == "name" :
+                # 名前付きPolicy:base_policyリストの11個目の要素（src-address）にマルチセルポリシーの要素を追加する
+                # 名前無しPolicy：base_policyリストの9個目の要素（src-address）にマルチセルポリシーの要素を追加する
+                if base_policy[4] == "name":
                     policy_src_address[10] = policy_element[2]
-                else:    
+                else:
                     policy_src_address[8] = policy_element[2]
                 policy_value_list.append(policy_src_address)
 
-            elif 'set' in policy_element and 'dst-address' in policy_element :
+            elif 'set' in policy_element and 'dst-address' in policy_element:
                 policy_dst_address = copy.copy(base_policy)
-                #名前付きPolicy:base_policyリストの12個目の要素（dst-address）にマルチセルポリシーの要素を追加する                
-                #名前無しPolicy：base_policyリストの10個目の要素（dst-address）にマルチセルポリシーの要素を追加する                
-                if base_policy[4] == "name" :
+                # 名前付きPolicy:base_policyリストの12個目の要素（dst-address）にマルチセルポリシーの要素を追加する
+                # 名前無しPolicy：base_policyリストの10個目の要素（dst-address）にマルチセルポリシーの要素を追加する
+                if base_policy[4] == "name":
                     policy_dst_address[11] = policy_element[2]
-                else:    
+                else:
                     policy_dst_address[9] = policy_element[2]
                 policy_value_list.append(policy_dst_address)
 
-            elif 'set' in policy_element and 'service' in policy_element :
+            elif 'set' in policy_element and 'service' in policy_element:
                 policy_service = copy.copy(base_policy)
-                #名前付きPolicy:base_policyリストの13個目の要素（service）にマルチセルポリシーの要素を追加する                
-                #名前無しPolicy：base_policyリストの11個目の要素（service）にマルチセルポリシーの要素を追加する                 
-                if base_policy[4] == "name" :
+                # 名前付きPolicy:base_policyリストの13個目の要素（service）にマルチセルポリシーの要素を追加する
+                # 名前無しPolicy：base_policyリストの11個目の要素（service）にマルチセルポリシーの要素を追加する
+                if base_policy[4] == "name":
                     policy_service[12] = policy_element[2]
-                else:    
+                else:
                     policy_service[10] = policy_element[2]
                 policy_value_list.append(policy_service)
 
@@ -138,19 +138,19 @@ def policy_multicell(file_name, target_line_no):
     return policy_value_list
 
 
-def takeout_policy_value(key, value , dictionary) :
+def takeout_policy_value(key, value, dictionary):
     i = 0
-    #value配列に入ったPolicyの値を取り出して関数に渡す
-    for v in value :
+    # value配列に入ったPolicyの値を取り出して関数に渡す
+    for v in value:
         convert_list_to_dict(key, value[i], dictionary)
-        i += 1      
-    
-def append_noname_to_policy_dict(value):
+        i += 1
 
+
+def append_noname_to_policy_dict(value):
     i = 0
     dictionary = policy_dict
-    #value配列に入ったPolicyの値をチェック
-    for v in value :
+    # value配列に入ったPolicyの値をチェック
+    for v in value:
         if len(value[i]) == 13 and "log" in value[i] or len(value[i]) == 12 and "log" not in value[i]:
             key = value_noname_key
             convert_list_to_dict(key, value[i], dictionary)
@@ -174,6 +174,7 @@ def append_noname_to_policy_dict(value):
             convert_list_to_dict(key, value[i], dictionary)
         i += 1
 
+
 def append_if_zone_to_zone_dict(value):
     if_zone = value
     if '"bri0/0"' in if_zone:
@@ -193,17 +194,18 @@ def create_ifinfo():
         for if_ip_c in if_ip_dict:
             if if_zone_c['if_name'].replace('"', '') in if_ip_c['if_name']:
                 flag = True
-                d = {'IF_Name': if_zone_c['if_name'].replace('"', ''), 'Zone': if_zone_c['zone_name'], 'IP': if_ip_c.get('ip_address')}
+                d = {'IF_Name': if_zone_c['if_name'].replace(
+                    '"', ''), 'Zone': if_zone_c['zone_name'], 'IP': if_ip_c.get('ip_address')}
                 ifinfo.append(d)
         else:
             if not flag:
-                d = {'IF_Name': if_zone_c['if_name'], 'Zone': if_zone_c['zone_name'], 'IP': 'None'}
+                d = {'IF_Name': if_zone_c['if_name'],
+                     'Zone': if_zone_c['zone_name'], 'IP': 'None'}
                 ifinfo.append(d)
 
 
 def absorb_config():
     line_count = 0
-    
     with open(file_name) as f:
         for line in f:
             line_count += 1
@@ -320,7 +322,7 @@ def confirm_file():
     except IndexError:
         print('コンフィグファイル名を入力してください')
         exit()
-    
+
 
 def confirm_disable_policy_output():
     global disable_policy_output
