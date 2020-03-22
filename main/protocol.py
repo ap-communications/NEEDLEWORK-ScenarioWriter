@@ -62,7 +62,3 @@ def handle_protocol_udp():
 
 
 handle_protocol_udp()
-
-# print('protocol_icmp : %s' % (len(protocol_icmp)))
-# print('protocol_tcp : %s' % (len(protocol_tcp)))
-# print('protocol_udp : %s' % (len(protocol_udp)))

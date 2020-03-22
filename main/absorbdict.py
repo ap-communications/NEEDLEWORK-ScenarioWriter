@@ -1,5 +1,4 @@
 import sys
-import linecache
 import copy
 
 
@@ -75,7 +74,6 @@ disable_policy_dict = []
 
 
 def convert_list_to_dict(key, value, dictionary):
-
     d = {k: v for k, v in zip(
         key, value)}
     dictionary.append(d)
@@ -222,10 +220,10 @@ def absorb_config():
                     key = value_name_keyex
                     value = policy_multicell(file_name, line_count)
                     takeout_policy_value(key, value, dictionary)
-            elif "set policy id" in line and not "name" in line and "from" in line:
+            elif "set policy id" in line and "name" not in line and "from" in line:
                 value = policy_multicell(file_name, line_count)
                 append_noname_to_policy_dict(value)
-            elif "set group service" in line:
+            elif "set group service" in line and "comment" not in line:
                 group_service = value
                 dictionary = group_service_dict
                 if len(group_service) == 6:

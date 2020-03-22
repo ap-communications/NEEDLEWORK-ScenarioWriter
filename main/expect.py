@@ -180,6 +180,3 @@ def handle_expect_icmp():
 
 handle_expect()
 handle_expect_icmp()
-
-# print('expect : %s' % (len(expect)))
-# print('expect_icmp : %s' % (len(expect_icmp)))

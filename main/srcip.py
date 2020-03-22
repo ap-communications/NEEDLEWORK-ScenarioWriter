@@ -12,15 +12,15 @@ src_ip = []
 def select_src_ip_from_scope_ip(policy, scope_ip):
     global src_ip
     service_name = policy['protocol']
-    multiple.confirm_service_element(service_name)
+    multiple.confirm_service_element_num(service_name)
     service_element_num = multiple.service_element_num
     if policy['dst_ip'] == '"Any"' and 'Untrust"' not in policy['dst_zone']:
         try:
             src_ip += [str(scope_ip[1]), str(scope_ip[-2]),
                        str(scope_ip[-2]), str(scope_ip[1])] * service_element_num
         except IndexError:
-            src_ip += [str(scope_ip[0]), str(scope_ip[0]),
-                       'NaN', 'NaN'] * service_element_num
+            src_ip += [str(scope_ip[0]), str(scope_ip[0]), str(scope_ip[0]), str(scope_ip[0])
+                       ] * service_element_num
     elif "VIP(" in policy['dst_ip'] and policy['protocol'] == '"ANY"':
         for vip_c in absorbdict.vip_dict:
             if policy['dst_ip'].strip(')"').split('(')[1] == vip_c['if_name'] and vip_c['global_ip'] == "interface-ip":
@@ -28,13 +28,13 @@ def select_src_ip_from_scope_ip(policy, scope_ip):
                     src_ip += [str(scope_ip[1]), str(scope_ip[-2])
                                ] * service_element_num
                 except IndexError:
-                    src_ip += [str(scope_ip[0]), 'NaN'] * service_element_num
+                    src_ip += [str(scope_ip[0]), str(scope_ip[0])] * service_element_num
             elif policy['dst_ip'].strip(')"').split('(')[1] == vip_c['global_ip']:
                 try:
                     src_ip += [str(scope_ip[1]), str(scope_ip[-2])
                                ] * service_element_num
                 except IndexError:
-                    src_ip += [str(scope_ip[0]), 'NaN'] * service_element_num
+                    src_ip += [str(scope_ip[0]), str(scope_ip[0])] * service_element_num
     else:
         address_name = policy['dst_ip']
         multiple.judge_dst_address_name(address_name)
@@ -43,7 +43,7 @@ def select_src_ip_from_scope_ip(policy, scope_ip):
             src_ip += [str(scope_ip[1]), str(scope_ip[-2])] * \
                 service_element_num * dst_address_element_num
         except IndexError:
-            src_ip += [str(scope_ip[0]), 'NaN'] * \
+            src_ip += [str(scope_ip[0]), str(scope_ip[0])] * \
                 service_element_num * dst_address_element_num
 
 
@@ -286,10 +286,10 @@ def confirm_src_if(policy, src_zone):
 def handle_src_ip_list(policy, src_ip_list):
     global src_ip
     dst_address = policy['dst_ip']
-    multiple.confirm_dst_address_element(policy, dst_address)
+    multiple.confirm_dst_address_element_num(policy, dst_address)
     dst_element_num = multiple.dst_address_element_num
     service_name = policy['protocol']
-    multiple.confirm_service_element(service_name)
+    multiple.confirm_service_element_num(service_name)
     for data in src_ip_list:
         src_ip += [data] * dst_element_num * multiple.service_element_num
 
@@ -381,11 +381,9 @@ def handle_src_ip(policy, service_element_num):
 def handle_multiple_element():
     for policy in absorbdict.policy_dict:
         service_name = policy['protocol']
-        multiple.confirm_service_element(service_name)
+        multiple.confirm_service_element_num(service_name)
         service_element_num = multiple.service_element_num
         handle_src_ip(policy, service_element_num)
 
 
 handle_multiple_element()
-
-# print('srcip : %s' % (len(src_ip)))

@@ -2,6 +2,8 @@ from main import absorbdict
 
 # 送信元または宛先IPがAnyかつそのゾーンがUntrust以外の場合そのポリシーはリストに（Any*2）個追加する
 # 送信元または宛先IPがVIPかつプロトコルがANYの場合そのポリシーはリストに（該当するVIP）個追加する
+# address_nameまたはservice_nameに空白が使用されている場合absorbdictでstrip()しているため出力できない
+# 例："SQL*Net V1"
 
 service_element_num = 1
 src_address_element_num = 1
@@ -32,6 +34,8 @@ pre_services = {'"PING"': {"icmp": ''},
                 '"TALK"': {"udp": '517'},
                 '"MS-SQL"': {"tcp": '1433'},
                 '"WINFRAME"': {"tcp": '1494'},
+                # '"SQL*Net V1"': {"tcp": '1525'},
+                # '"SQL*Net V2"': {"tcp": '1521'},
                 '"L2TP"': {"udp": '1701'},
                 '"H.323"': {"tcp": '1720'},
                 '"PPTP"': {"tcp": '1723'},
@@ -47,7 +51,7 @@ pre_services = {'"PING"': {"icmp": ''},
 def confirm_service_name(service_name):
     global service_list
     service_list = []
-    if len(absorbdict.group_service_dict) >= 2:
+    if absorbdict.group_service_dict != []:
         flags = False
         for group_service_c in absorbdict.group_service_dict:
             if service_name == group_service_c['group_service_name']:
@@ -80,7 +84,7 @@ def count_setting_service_element_num(service_list_c):
     return service_element_num
 
 
-def count_service_element_num(service_name):
+def confirm_service_element_num(service_name):
     global service_element_num
     service_element_num = 0
     confirm_service_name(service_name)
@@ -97,14 +101,6 @@ def count_service_element_num(service_name):
     return service_element_num
 
 
-def confirm_service_element(service_name):
-    # service_nameレベルにしたservice_listを返す
-    count_service_element_num(service_name)
-    # service_list内の各要素を処理しservice_element_numを返す
-    return service_element_num
-
-
-# TODO:検証
 def handle_setting_service_name(service_list_c):
     global service_element_num
     flag = False
@@ -193,9 +189,35 @@ def judge_dst_address_name(address_name):
         return dst_address_element_num
 
 
+def convert_service_name_to_port(used_protocol, data_list, service_protocol):
+    for service in service_protocol:
+        if service['protocol'] == used_protocol:
+            data_list += [str(service['port'])]
+        else:
+            data_list += [str("NaN")]
+    return data_list
+
+
+def handle_service_name_list(policy, append_list, used_protocol):
+    # service_nameレベルにしたservice_listを返す
+    service_name = policy['protocol']
+    confirm_service_name(service_name)
+
+
 def append_data_to_list(append_list, data, src_element_num, dst_element_num, service_element_num):
     append_list += [data] * src_element_num * \
         dst_element_num * service_element_num
+
+
+def append_data_list_to_append_list(policy, data_list, append_list):
+    # print(data_list)
+    confirm_src_address_element_num(policy, policy['src_ip'])
+    confirm_dst_address_element_num(policy, policy['dst_ip'])
+    #print(src_element_num, dst_element_num)
+    for n in range(src_element_num * dst_element_num):
+        for data in data_list:
+            # print(data, append_list)
+            append_list += [data] 
 
 
 # 各要素の要素数を判定する関数にデータを渡して戻ってきた値に応じてリストにデータを追加していく
@@ -203,10 +225,10 @@ def handle_multiple_ip(policy, append_list, data):
     global service_element_num
     src_address = policy['src_ip']
     dst_address = policy['dst_ip']
-    confirm_src_address_element(policy, src_address)
-    confirm_dst_address_element(policy, dst_address)
+    confirm_src_address_element_num(policy, src_address)
+    confirm_dst_address_element_num(policy, dst_address)
     service_name = policy['protocol']
-    confirm_service_element(service_name)
+    confirm_service_element_num(service_name)
     append_data_to_list(append_list, data, src_element_num,
                         dst_element_num, service_element_num)
 
@@ -231,7 +253,7 @@ def confirm_src_vip_element(policy):
         return src_element_num
 
 
-def confirm_src_address_element(policy, src_address):
+def confirm_src_address_element_num(policy, src_address):
     global src_element_num
     if policy['src_ip'] == '"Any"' and 'Untrust"' not in policy['src_zone']:
         src_element_num = 2
@@ -267,7 +289,7 @@ def confirm_dst_vip_element(policy):
         return dst_element_num
 
 
-def confirm_dst_address_element(policy, dst_address):
+def confirm_dst_address_element_num(policy, dst_address):
     global dst_element_num
     # TODO:IPが割り当てられていないゾーンを用いると重複して出力されているためelement_numを修正する
     if policy['dst_ip'] == '"Any"' and 'Untrust"' not in policy['dst_zone']:

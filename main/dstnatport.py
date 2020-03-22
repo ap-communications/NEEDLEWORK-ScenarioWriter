@@ -37,4 +37,3 @@ def handle_dst_nat_port():
 
 
 handle_dst_nat_port()
-# print('dstnatport : %s' % (len(dst_nat_port)))

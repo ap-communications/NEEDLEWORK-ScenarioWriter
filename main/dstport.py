@@ -5,47 +5,7 @@ dst_port_icmp = []
 dst_port_tcp = []
 dst_port_udp = []
 
-src_element_num = 1
-dst_element_num = 1
-
 # dst-portのリストの生成
-
-
-pre_services = {'"PING"': {"icmp": ''},
-                '"ICMP-ANY"': {"icmp": ''},
-                '"FTP"': {"tcp": '21', "udp": '21'},
-                '"SSH"': {"tcp": '22'},
-                '"TELNET"': {"tcp": '23'},
-                '"SMTP"': {"tcp": '25'},
-                '"MAIL"': {"tcp": '25'},
-                '"DNS"': {"tcp": '53', "udp": '53'},
-                '"TFTP"': {"tcp": '69'},
-                '"HTTP"': {"tcp": '80'},
-                '"POP3"': {"tcp": '110'},
-                '"NTP"': {"tcp": '123', "udp": '123'},
-                '"MS-RPC-EPM"': {"tcp": '135', "udp": '135'},
-                '"NBNAME"': {"udp": '137'},
-                '"NBDS"': {"udp": '138'},
-                '"SMB"': {"tcp": '139'},
-                '"IMAP"': {"tcp": '143'},
-                '"SNMP"': {"tcp": '161', "udp": '161'},
-                '"LDAP"': {"tcp": '389'},
-                '"HTTPS"': {"tcp": '443'},
-                '"IKE"': {"udp": '500'},
-                '"SYSLOG"': {"udp": '514'},
-                '"TALK"': {"udp": '517'},
-                '"MS-SQL"': {"tcp": '1433'},
-                '"WINFRAME"': {"tcp": '1494'},
-                '"L2TP"': {"udp": '1701'},
-                '"H.323"': {"tcp": '1720'},
-                '"PPTP"': {"tcp": '1723'},
-                '"RADIUS"': {"udp": '1812'},
-                '"SIP"': {"tcp": '5060', "udp": '5060'},
-                '"X-WINDOWS"': {"tcp": '6000'},
-                '"HTTP-EXT"': {"tcp": '8000'},
-                '"TRACEROUTE"': {"icmp": '', "udp": '33400'},
-                '"TCP-ANY"': {"tcp": '65535'},
-                '"UDP-ANY"': {"udp": '65535'}}
 
 
 def handle_protocol_any(policy, append_list, used_protocol):
@@ -63,19 +23,20 @@ def handle_protocol_any(policy, append_list, used_protocol):
 
 
 def handle_multiple_service_port(policy, append_list, used_protocol):
-    global service_list
     global data_list
     data_list = []
     service_list = multiple.service_list
     for service_list_c in service_list:
-        for pre_service_name, port_num in pre_services.items():
+        flag = False
+        for pre_service_name, port_num in multiple.pre_services.items():
             if service_list_c == pre_service_name:
+                flag = True
                 handle_pre_service_element(
                     policy, append_list, port_num, used_protocol)
-                break
         else:
-            handle_setting_service_name(used_protocol, service_list_c)
-    return append_data_list_to_append_list(policy, data_list, append_list)
+            if not flag:
+                handle_setting_service_name(used_protocol, service_list_c)
+    return multiple.append_data_list_to_append_list(policy, data_list, append_list)
 
 
 def handle_setting_service_name(used_protocol, service_list_c):
@@ -91,35 +52,12 @@ def handle_setting_service_name(used_protocol, service_list_c):
             continue
     else:
         if not flag:
-            # TODO:udpの"SSH"は対応していないサービスですとなっているので調査する
             print('%sの%sは対応していないサービスです' % (used_protocol, service_list_c))
             print('出力をスキップしました')
             data_list += [str("NaN")]
         else:
-            convert_service_name_to_port(
-                used_protocol, service_c, service_protocol)
-
-
-def convert_service_name_to_port(used_protocol, service_c, service_protocol):
-    global data_list
-    for service in service_protocol:
-        if service['protocol'] == used_protocol:
-            data_list += [str(service['port'])]
-        else:
-            data_list += [str("NaN")]
-    return data_list
-
-
-def append_data_list_to_append_list(policy, data_list, append_list):
-    src_address = policy['src_ip']
-    dst_address = policy['dst_ip']
-    multiple.confirm_src_address_element(policy, src_address)
-    multiple.confirm_dst_address_element(policy, dst_address)
-    src_element_num = multiple.src_element_num
-    dst_element_num = multiple.dst_element_num
-    for n in range(src_element_num * dst_element_num):
-        for data in data_list:
-            append_list += [data]
+            multiple.convert_service_name_to_port(
+                used_protocol, data_list, service_protocol)
 
 
 def handle_pre_service_element(policy, append_list, port_num, used_protocol):
@@ -133,9 +71,7 @@ def handle_pre_service_element(policy, append_list, port_num, used_protocol):
 
 
 def handle_other_port(policy, append_list, used_protocol):
-    # service_nameレベルにしたservice_listを返す
-    service_name = policy['protocol']
-    multiple.confirm_service_name(service_name)
+    multiple.handle_service_name_list(policy, append_list, used_protocol)
     # service_list内のserviceのappend処理を行う
     handle_multiple_service_port(policy, append_list, used_protocol)
 
@@ -152,31 +88,6 @@ def handle_basic_dst_port(append_list, used_protocol):
                 policy, append_list, used_protocol)
 
 
-def handle_dst_port_icmp():
-    global dst_port_icmp
-    append_list = dst_port_icmp
-    used_protocol = "icmp"
-    handle_basic_dst_port(append_list, used_protocol)
-
-
-def handle_dst_port_tcp():
-    global dst_port_tcp
-    append_list = dst_port_tcp
-    used_protocol = "tcp"
-    handle_basic_dst_port(append_list, used_protocol)
-
-
-def handle_dst_port_udp():
-    global dst_port_udp
-    append_list = dst_port_udp
-    used_protocol = "udp"
-    handle_basic_dst_port(append_list, used_protocol)
-
-
-handle_dst_port_icmp()
-handle_dst_port_tcp()
-handle_dst_port_udp()
-
-# print('dst_port_icmp : %s' % (len(dst_port_icmp)))
-# print('dst_port_tcp : %s' % (len(dst_port_tcp)))
-# print('dst_port_udp : %s' % (len(dst_port_udp)))
+handle_basic_dst_port(dst_port_icmp, "icmp")
+handle_basic_dst_port(dst_port_tcp, "tcp")
+handle_basic_dst_port(dst_port_udp, "udp")

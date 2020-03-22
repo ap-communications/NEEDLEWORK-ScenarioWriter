@@ -108,5 +108,3 @@ def handle_src_nat_ip():
 
 
 handle_src_nat_ip()
-
-# print('srcnatip : %s' % (len(src_nat_ip)))
