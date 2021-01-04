@@ -70,7 +70,7 @@
 
 ## VIP
 * VIP対応サービス（ポート）は以下の通りです。
-  * FTP（21)
+  * FTP(21)
   * DNS(53)
   * HTTP(80)
   * NTP(123)
@@ -95,7 +95,7 @@
   
   * PING(icmp)
   * ICMP-ANY(icmp)
-  * FTP（udp 21)
+  * FTP（tcp 21)
   * SSH（tcp 22)
   * TELNET(tcp 23)
   * SMTP(tcp 25)

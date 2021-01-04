@@ -13,7 +13,7 @@ dst_element_num = 1
 
 pre_services = {'"PING"': {"icmp": ''},
                 '"ICMP-ANY"': {"icmp": ''},
-                '"FTP"': {"tcp": '21', "udp": '21'},
+                '"FTP"': {"tcp": '21'},
                 '"SSH"': {"tcp": '22'},
                 '"TELNET"': {"tcp": '23'},
                 '"SMTP"': {"tcp": '25'},
