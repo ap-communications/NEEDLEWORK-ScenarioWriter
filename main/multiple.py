@@ -23,20 +23,20 @@ pre_services = {'"PING"': {"icmp": ''},
                 '"MS-RPC-EPM"': {"tcp": '135', "udp": '135'},
                 '"NBNAME"': {"udp": '137'},
                 '"NBDS"': {"udp": '138'},
-                '"SMB"': {"tcp": '139'},
+                '"SMB"': {"tcp": ['139', '445']},
                 '"IMAP"': {"tcp": '143'},
-                '"SNMP"': {"tcp": '161', "udp": '161'},
+                '"SNMP"': {"tcp": ['161', '162'], "udp": ['161', '162']},
                 '"LDAP"': {"tcp": '389'},
                 '"HTTPS"': {"tcp": '443'},
                 '"IKE"': {"udp": '500'},
                 '"SYSLOG"': {"udp": '514'},
-                '"TALK"': {"udp": '517'},
+                '"TALK"': {"udp": ['517', '518']},
                 '"MS-SQL"': {"tcp": '1433'},
                 '"WINFRAME"': {"tcp": '1494'},
                 '"L2TP"': {"udp": '1701'},
                 '"H.323"': {"tcp": '1720'},
                 '"PPTP"': {"tcp": '1723'},
-                '"RADIUS"': {"udp": '1812'},
+                '"RADIUS"': {"udp": ['1812', '1813']},
                 '"SIP"': {"tcp": '5060', "udp": '5060'},
                 '"X-WINDOWS"': {"tcp": '6000'},
                 '"HTTP-EXT"': {"tcp": '8000'},
@@ -132,9 +132,9 @@ def confirm_pre_service_used_protocol(pre_service_name):
 def count_pre_service_element(pre_service_name):
     global pre_service_element_num
     confirm_pre_service_used_protocol(pre_service_name)
-    used_keys = [k for k, v in pre_service_used_protocol.items()
-                 ]
-    pre_service_element_num = len(used_keys)
+    pre_service_element_num = 0
+    for k, v in pre_service_used_protocol.items():
+        pre_service_element_num += len(v)           
     return pre_service_element_num
 
 

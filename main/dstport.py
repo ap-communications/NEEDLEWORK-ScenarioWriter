@@ -11,43 +11,6 @@ dst_element_num = 1
 # dst-portのリストの生成
 
 
-pre_services = {'"PING"': {"icmp": ''},
-                '"ICMP-ANY"': {"icmp": ''},
-                '"FTP"': {"tcp": '21'},
-                '"SSH"': {"tcp": '22'},
-                '"TELNET"': {"tcp": '23'},
-                '"SMTP"': {"tcp": '25'},
-                '"MAIL"': {"tcp": '25'},
-                '"DNS"': {"tcp": '53', "udp": '53'},
-                '"TFTP"': {"tcp": '69'},
-                '"HTTP"': {"tcp": '80'},
-                '"POP3"': {"tcp": '110'},
-                '"NTP"': {"tcp": '123', "udp": '123'},
-                '"MS-RPC-EPM"': {"tcp": '135', "udp": '135'},
-                '"NBNAME"': {"udp": '137'},
-                '"NBDS"': {"udp": '138'},
-                '"SMB"': {"tcp": '139'},
-                '"IMAP"': {"tcp": '143'},
-                '"SNMP"': {"tcp": '161', "udp": '161'},
-                '"LDAP"': {"tcp": '389'},
-                '"HTTPS"': {"tcp": '443'},
-                '"IKE"': {"udp": '500'},
-                '"SYSLOG"': {"udp": '514'},
-                '"TALK"': {"udp": '517'},
-                '"MS-SQL"': {"tcp": '1433'},
-                '"WINFRAME"': {"tcp": '1494'},
-                '"L2TP"': {"udp": '1701'},
-                '"H.323"': {"tcp": '1720'},
-                '"PPTP"': {"tcp": '1723'},
-                '"RADIUS"': {"udp": '1812'},
-                '"SIP"': {"tcp": '5060', "udp": '5060'},
-                '"X-WINDOWS"': {"tcp": '6000'},
-                '"HTTP-EXT"': {"tcp": '8000'},
-                '"TRACEROUTE"': {"icmp": '', "udp": '33400'},
-                '"TCP-ANY"': {"tcp": '65535'},
-                '"UDP-ANY"': {"udp": '65535'}}
-
-
 def handle_protocol_any(policy, append_list, used_protocol):
     if policy['src_ip'] == policy['dst_ip'] == '"Any"' and used_protocol != "icmp":
         data = str("65535")
@@ -68,7 +31,7 @@ def handle_multiple_service_port(policy, append_list, used_protocol):
     data_list = []
     service_list = multiple.service_list
     for service_list_c in service_list:
-        for pre_service_name, port_num in pre_services.items():
+        for pre_service_name, port_num in multiple.pre_services.items():
             if service_list_c == pre_service_name:
                 handle_pre_service_element(
                     policy, append_list, port_num, used_protocol)
@@ -125,10 +88,20 @@ def append_data_list_to_append_list(policy, data_list, append_list):
 def handle_pre_service_element(policy, append_list, port_num, used_protocol):
     global data_list
     for key, value in port_num.items():
-        if key == used_protocol:
-            data_list += [str(value)]
+        # valueがlistか確認する
+        if type(value) is list:
+            # list内のvalueをappendする
+            value_num = len(value)
+            if key == used_protocol:
+                for value_c in value:
+                    data_list += [str(value_c)]
+            else:
+                data_list += [str("NaN")] * value_num
         else:
-            data_list += [str("NaN")]
+            if key == used_protocol:
+                data_list += [str(value)]
+            else:
+                data_list += [str("NaN")]
     return data_list
 
 
