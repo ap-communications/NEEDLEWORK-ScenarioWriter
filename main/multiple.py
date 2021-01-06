@@ -2,7 +2,6 @@ from main import absorbdict
 
 # 送信元または宛先IPがAnyかつそのゾーンがUntrust以外の場合そのポリシーはリストに（Any*2）個追加する
 # 送信元または宛先IPがVIPかつプロトコルがANYの場合そのポリシーはリストに（該当するVIP）個追加する
-# TODO:group_addressのaddress_nameにgroup_addressは別途対応する
 
 service_element_num = 1
 src_address_element_num = 1
@@ -107,7 +106,6 @@ def confirm_service_element(service_name):
     return service_element_num
 
 
-# TODO:検証
 def handle_setting_service_name(service_list_c):
     global service_element_num
     flag = False
@@ -134,7 +132,10 @@ def count_pre_service_element(pre_service_name):
     confirm_pre_service_used_protocol(pre_service_name)
     pre_service_element_num = 0
     for k, v in pre_service_used_protocol.items():
-        pre_service_element_num += len(v)           
+        if type(v) == list:
+            pre_service_element_num += len(v)
+        else:
+            pre_service_element_num += 1
     return pre_service_element_num
 
 
@@ -145,12 +146,14 @@ def count_group_address_element(group_name):
         if group_name == group_address_c['group_name']:
             address_element_name = group_address_c['address_name']
             flag = False
+            c = 0
             for group_address2_c in absorbdict.group_address_dict:
                 if address_element_name == group_address2_c['group_name']:
                     flag = True
+                    c += 1
             else:
                 if flag:
-                    address_element_num = 1
+                    address_element_num += c
                 else:
                     flag = False
                     for address_c in absorbdict.address_dict:
