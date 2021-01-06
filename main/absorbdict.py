@@ -2,8 +2,6 @@ import sys
 import linecache
 import copy
 
-# TODO:マルチセルポリシーに対応する
-
 option = sys.argv
 
 ifinfo = []

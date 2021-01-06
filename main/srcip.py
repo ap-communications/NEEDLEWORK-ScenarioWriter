@@ -12,8 +12,7 @@ src_ip = []
 def select_src_ip_from_scope_ip(policy, scope_ip):
     global src_ip
     service_name = policy['protocol']
-    multiple.confirm_service_element(service_name)
-    service_element_num = multiple.service_element_num
+    service_element_num = multiple.confirm_service_element(service_name)
     if policy['dst_ip'] == '"Any"' and 'Untrust"' not in policy['dst_zone']:
         try:
             src_ip += [str(scope_ip[1]), str(scope_ip[-2]),
@@ -39,7 +38,8 @@ def select_src_ip_from_scope_ip(policy, scope_ip):
         multiple.judge_dst_address_name(address_name)
         dst_address_element_num = multiple.dst_address_element_num
         try:
-            src_ip += [str(scope_ip[1]), str(scope_ip[-2])] * service_element_num * dst_address_element_num
+            src_ip += [str(scope_ip[1])] * service_element_num * dst_address_element_num
+            src_ip += [str(scope_ip[-2])] * service_element_num * dst_address_element_num
         except IndexError:
             src_ip += [str(scope_ip[0]), 'NaN'] * service_element_num * dst_address_element_num
 
@@ -285,13 +285,23 @@ def judge_src_ip_is_group_address(policy, service_element_num):
         flag = False
         for group_address_c in absorbdict.group_address_dict:
             if policy['src_ip'] == group_address_c['group_name']:
-                flag = True
+                flags = False
                 src_address_name = group_address_c['address_name']
-                for address_c in absorbdict.address_dict:
-                    if src_address_name == address_c['address_name']:
+                for group_address2_c in absorbdict.group_address_dict:
+                    if src_address_name == group_address2_c['group_name']:
                         flags = True
-                        data = str(address_c['ip_address'])
-                        dst_ip_element(policy, data, service_element_num)
+                        sub_address_name = group_address2_c['address_name']
+                        for sub_address_c in absorbdict.address_dict:
+                            if sub_address_name == sub_address_c['address_name']:
+                                data = str(sub_address_c['ip_address'])
+                                dst_ip_element(policy, data, service_element_num)
+                else:
+                    if not flags:
+                        for address_c in absorbdict.address_dict:
+                            if src_address_name == address_c['address_name']:
+                                data = str(address_c['ip_address'])
+                                dst_ip_element(policy, data, service_element_num)
+                    flag = True
         else:
             if not flag:
                 address_src_ip(policy, service_element_num)
@@ -355,8 +365,7 @@ def handle_src_ip(policy, service_element_num):
 def handle_multiple_element():
     for policy in absorbdict.policy_dict:
         service_name = policy['protocol']
-        multiple.confirm_service_element(service_name)
-        service_element_num = multiple.service_element_num
+        service_element_num = multiple.confirm_service_element(service_name)
         handle_src_ip(policy, service_element_num)
 
 

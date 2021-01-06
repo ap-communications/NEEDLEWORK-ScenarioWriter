@@ -225,6 +225,7 @@ def handle_dst_ip_is_vip(policy, service_element_num):
                 continue
             elif vip_c['global_ip'] == "interface-ip" and vip_c['service_name'] == policy['protocol']:
                 vip_list += [str(vip_c['private_ip'])]
+
         elif policy['dst_ip'].strip(')"').split('(')[1] == vip_c['global_ip']:
             if policy['protocol'] == '"ANY"':
                 vip_list += [str(vip_c['private_ip'])]
@@ -285,8 +286,7 @@ def confirm_dst_if(policy, dst_zone):
 def handle_dst_ip_list(policy, dst_ip_list):
     global dst_ip
     src_address = policy['src_ip']
-    multiple.confirm_src_address_element(policy, src_address)
-    src_element_num = multiple.src_address_element_num
+    src_element_num = multiple.confirm_src_address_element(policy, src_address)
     service_name = policy['protocol']
     multiple.confirm_service_element(service_name)
     for n in range(src_element_num):
@@ -297,22 +297,29 @@ def handle_dst_ip_list(policy, dst_ip_list):
 def judge_dst_ip_is_group_address(policy, service_element_num):
     if absorbdict.group_address_dict != []:
         dst_ip_list = []
-        flag = False
         for group_address_c in absorbdict.group_address_dict:
             if policy['dst_ip'] == group_address_c['group_name']:
-                flag = True
+                flags = False
                 dst_address_name = group_address_c['address_name']
-                for address_c in absorbdict.address_dict:
-                    if dst_address_name == address_c['address_name']:
+                for group_address2_c in absorbdict.group_address_dict:
+                    if dst_address_name == group_address2_c['group_name']:
+                        sub_address_name = group_address2_c['address_name']
                         flags = True
-                        dst_ip_list += [str(address_c['ip_address'])]
-                        continue
+                        for sub_address_c in absorbdict.address_dict:
+                            if sub_address_name == sub_address_c['address_name']:
+                                dst_ip_list += [str(sub_address_c['ip_address'])]
+                                continue
+                else:
+                    if not flags:
+                        for address_c in absorbdict.address_dict:
+                            if dst_address_name == address_c['address_name']:
+                                dst_ip_list += [str(address_c['ip_address'])]
+                                continue
         else:
             if dst_ip_list != []:
                 handle_dst_ip_list(policy, dst_ip_list)
             else:
-                if not flag:
-                    address_dst_ip(policy, service_element_num)
+                address_dst_ip(policy, service_element_num)
     else:
         address_dst_ip(policy, service_element_num)
 
