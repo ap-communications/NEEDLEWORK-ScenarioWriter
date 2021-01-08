@@ -203,11 +203,19 @@ def dst_ip_element(policy, data, service_element_num):
         src_ip += [data] * service_element_num * 2
     elif "VIP(" in policy['dst_ip']:
         for vip_c in absorbdict.vip_dict:
-            if policy['dst_ip'].strip(')"').split('(')[1] == vip_c['if_name'] and vip_c['global_ip'] == "interface-ip":
-                src_ip += [data] * service_element_num
-            elif policy['dst_ip'].strip(')"').split('(')[1] == vip_c['global_ip']:
-                src_ip += [data] * service_element_num
-            continue
+            if policy['protocol'] == '"ANY"':
+                if policy['dst_ip'].strip(')"').split('(')[1] == vip_c['if_name'] and vip_c['global_ip'] == "interface-ip":
+                    src_ip += [data] * service_element_num
+                elif policy['dst_ip'].strip(')"').split('(')[1] == vip_c['global_ip']:
+                    src_ip += [data] * service_element_num
+                continue
+            else:
+                if policy['dst_ip'].strip(')"').split('(')[1] == vip_c['if_name'] and vip_c['global_ip'] == "interface-ip" and policy['protocol'] == vip_c['service_name']:
+                    src_ip += [data] * service_element_num
+                    break
+                elif policy['dst_ip'].strip(')"').split('(')[1] == vip_c['global_ip']:
+                    src_ip += [data] * service_element_num
+                    break
     else:
         address_name = policy['dst_ip']
         multiple.judge_dst_address_name(address_name)
